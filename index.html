@@ -157,6 +157,9 @@
             <button id="tool-select" class="tool-btn active" data-tool="SELECT" title="Select & Move Devices">
               <span>↖</span> Pointer
             </button>
+            <button id="tool-wire" class="tool-btn" data-tool="WIRE" title="Click first device, then second device to draw cable">
+              <span>⚡</span> Connect Wire
+            </button>
             <button id="tool-cable" class="tool-btn" data-tool="CABLE" title="Click link to Cut / Resplice cable">
               <span>✂</span> Cut/Splice
             </button>
@@ -169,6 +172,9 @@
             <button id="tool-add-node" class="tool-btn" title="Add New Network Device (Router, Switch, Host...)">
               <span>+</span> Add Node
             </button>
+            <button id="tool-delete-node" class="tool-btn" title="Delete Selected Device" style="color:var(--hazard-amber);">
+              <span>🗑️</span> Delete
+            </button>
             <button id="tool-share-lab" class="tool-btn" title="Export & Copy Shareable Lab URL">
               <span>🔗</span> Share Lab
             </button>
@@ -177,6 +183,9 @@
             </button>
           </div>
         </div>
+
+        <!-- Floating Interactive Hint Bar -->
+        <div id="topology-hint-bar" class="topology-hint-bar" style="display:none;"></div>
 
         <!-- Layered Visualizer Stage -->
         <div class="topology-stage">

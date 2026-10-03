@@ -7,7 +7,12 @@
  */
 
 export class TopologyCanvas {
-  constructor({ svgEl, canvasEl, networkGraph, packetEngine, onNodeSelect, onLinkTap }) {
+  constructor({ svgEl, canvasEl, networkGraph, packetEngine, soundFx, onNodeSelect, onLinkTap }) {
+    this.soundFx = soundFx;
+    this.hintBar = document.getElementById('topology-hint-bar');
+    this.wireStartNodeId = null;
+    this.wireMousePos = null;
+    this.hintTimer = null;
     this.svg = svgEl;
     this.canvas = canvasEl;
     this.ctx = canvasEl ? canvasEl.getContext('2d') : null;
@@ -64,12 +69,77 @@ export class TopologyCanvas {
 
   setTool(tool) {
     this.activeTool = tool;
+    this.wireStartNodeId = null;
+    this.wireMousePos = null;
+    const oldLine = this.svg?.querySelector('#dynamic-wire-line');
+    if (oldLine) oldLine.remove();
+
+    if (tool === 'WIRE') {
+      this.showHint('⚡ [WIRE TOOL] Click first device, then click second device to link them.');
+    } else if (tool === 'CABLE') {
+      this.showHint('✂️ [CUT/SPLICE] Click any wire to cut or repair the connection.');
+    } else if (tool === 'SNIFFER') {
+      this.showHint('🔍 [SNIFFER TAP] Click any wire to attach the Pocket Wireshark sniffer.');
+    } else {
+      this.hideHint();
+    }
+    this.render();
+  }
+
+  showHint(msg, timeout = 0) {
+    if (!this.hintBar) this.hintBar = document.getElementById('topology-hint-bar');
+    if (!this.hintBar) return;
+    this.hintBar.innerHTML = msg;
+    this.hintBar.style.display = 'flex';
+    if (this.hintTimer) clearTimeout(this.hintTimer);
+    if (timeout > 0) {
+      this.hintTimer = setTimeout(() => this.hideHint(), timeout);
+    }
+  }
+
+  hideHint() {
+    if (!this.hintBar) this.hintBar = document.getElementById('topology-hint-bar');
+    if (!this.hintBar) return;
+    this.hintBar.style.display = 'none';
+  }
+
+  deleteSelected() {
+    if (!this.selectedNodeId) {
+      this.showHint('⚠️ Click a device first to select it for deletion.', 2500);
+      return;
+    }
+    const node = this.graph.getNode(this.selectedNodeId);
+    const name = node ? node.name : this.selectedNodeId;
+    this.graph.removeNode(this.selectedNodeId);
+    this.selectedNodeId = null;
+    if (this.soundFx) this.soundFx.playKeypress();
+    this.showHint(`🗑️ Deleted device: <strong>${name}</strong>`, 2500);
+    this.render();
   }
 
   initListeners() {
     window.addEventListener('resize', () => {
       this.initCanvasSize();
       this.render();
+    });
+
+    // Keyboard shortcut: Delete or Backspace to delete selected device
+    window.addEventListener('keydown', (e) => {
+      if ((e.key === 'Delete' || e.key === 'Backspace') && this.selectedNodeId) {
+        const tag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+        if (tag !== 'input' && tag !== 'textarea') {
+          e.preventDefault();
+          this.deleteSelected();
+        }
+      }
+      if (e.key === 'Escape' && this.activeTool === 'WIRE') {
+        this.wireStartNodeId = null;
+        this.wireMousePos = null;
+        const oldLine = this.svg.querySelector('#dynamic-wire-line');
+        if (oldLine) oldLine.remove();
+        this.hideHint();
+        this.render();
+      }
     });
 
     // Node Dragging via SVG
@@ -98,6 +168,47 @@ export class TopologyCanvas {
     if (target) {
       const nodeId = target.getAttribute('data-node-id');
       const node = this.graph.getNode(nodeId);
+
+      // --- WIRE TOOL INTERACTION ---
+      if (this.activeTool === 'WIRE') {
+        if (!this.wireStartNodeId) {
+          this.wireStartNodeId = nodeId;
+          const rect = this.svg.getBoundingClientRect();
+          this.wireMousePos = { x: (e.clientX || e.pageX) - rect.left, y: (e.clientY || e.pageY) - rect.top };
+          this.showHint(`⚡ Cable started from <strong>${node.name}</strong>. Now click target device.`);
+          if (this.soundFx) this.soundFx.playKeypress();
+          this.render();
+          return;
+        } else {
+          if (this.wireStartNodeId !== nodeId) {
+            const srcNode = this.graph.getNode(this.wireStartNodeId);
+            const existingLink = Array.from(this.graph.links.values()).find(
+              l => (l.sourceNodeId === this.wireStartNodeId && l.targetNodeId === nodeId) ||
+                   (l.sourceNodeId === nodeId && l.targetNodeId === this.wireStartNodeId)
+            );
+
+            if (!existingLink) {
+              this.graph.addLink({
+                sourceNodeId: this.wireStartNodeId,
+                targetNodeId: nodeId,
+                status: 'OPERATIONAL'
+              });
+              if (this.soundFx) this.soundFx.playSuccess();
+              this.showHint(`✓ Cable connected: <strong>${srcNode.name}</strong> ⟷ <strong>${node.name}</strong>!`, 3000);
+            } else {
+              this.showHint(`⚠️ Devices are already connected by cable.`, 2500);
+            }
+          }
+          this.wireStartNodeId = null;
+          this.wireMousePos = null;
+          const oldLine = this.svg.querySelector('#dynamic-wire-line');
+          if (oldLine) oldLine.remove();
+          this.render();
+          return;
+        }
+      }
+
+      // --- SELECT / POINTER DRAGGING ---
       if (node) {
         this.selectedNodeId = nodeId;
         this.draggedNode = node;
@@ -107,15 +218,60 @@ export class TopologyCanvas {
         if (this.onNodeSelect) this.onNodeSelect(nodeId);
         this.render();
       }
+    } else {
+      if (this.activeTool === 'WIRE' && this.wireStartNodeId) {
+        this.wireStartNodeId = null;
+        this.wireMousePos = null;
+        const oldLine = this.svg.querySelector('#dynamic-wire-line');
+        if (oldLine) oldLine.remove();
+        this.showHint('⚡ [WIRE TOOL] Click first device, then click second device to link them.');
+        this.render();
+      }
     }
   }
 
   handlePointerMove(e) {
-    if (!this.draggedNode) return;
     const rect = this.svg.getBoundingClientRect();
-    this.draggedNode.x = Math.max(40, Math.min(rect.width - 40, (e.clientX - rect.left) - this.dragOffset.x));
-    this.draggedNode.y = Math.max(40, Math.min(rect.height - 40, (e.clientY - rect.top) - this.dragOffset.y));
+    const mouseX = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+    const mouseY = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+
+    if (this.activeTool === 'WIRE' && this.wireStartNodeId) {
+      this.wireMousePos = { x: mouseX, y: mouseY };
+      this.updateDynamicWireLine();
+      return;
+    }
+
+    if (!this.draggedNode) return;
+    this.draggedNode.x = Math.max(40, Math.min(rect.width - 40, mouseX - this.dragOffset.x));
+    this.draggedNode.y = Math.max(40, Math.min(rect.height - 40, mouseY - this.dragOffset.y));
     this.render();
+  }
+
+  updateDynamicWireLine() {
+    let wireEl = this.svg.querySelector('#dynamic-wire-line');
+    const srcNode = this.graph.getNode(this.wireStartNodeId);
+    if (!srcNode || !this.wireMousePos) {
+      if (wireEl) wireEl.remove();
+      return;
+    }
+
+    if (!wireEl) {
+      wireEl = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      wireEl.id = 'dynamic-wire-line';
+      wireEl.setAttribute('stroke', '#00f0ff');
+      wireEl.setAttribute('stroke-width', '2.5');
+      wireEl.setAttribute('stroke-dasharray', '6 3');
+      wireEl.setAttribute('stroke-linecap', 'round');
+      wireEl.style.filter = 'drop-shadow(0 0 8px #00f0ff)';
+      const linksLayer = this.svg.querySelector('.links-layer');
+      if (linksLayer) linksLayer.appendChild(wireEl);
+      else this.svg.appendChild(wireEl);
+    }
+
+    wireEl.setAttribute('x1', srcNode.x);
+    wireEl.setAttribute('y1', srcNode.y);
+    wireEl.setAttribute('x2', this.wireMousePos.x);
+    wireEl.setAttribute('y2', this.wireMousePos.y);
   }
 
   handlePointerUp() {
@@ -178,9 +334,11 @@ export class TopologyCanvas {
            data-node-id="${node.id}" 
            transform="translate(${node.x}, ${node.y})">
           
-          ${isSelected ? `
+          ${node.id === this.wireStartNodeId ? `
+            <circle cx="0" cy="0" r="36" fill="rgba(0,240,255,0.12)" stroke="#00f0ff" stroke-width="2.5" stroke-dasharray="6 3" />
+          ` : (isSelected ? `
             <circle cx="0" cy="0" r="32" fill="none" stroke="#00f0ff" stroke-width="1.5" stroke-dasharray="4 2" />
-          ` : ''}
+          ` : '')}
 
           <!-- Node Base Glyph -->
           ${glyph}

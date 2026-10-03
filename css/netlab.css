@@ -336,3 +336,25 @@
     border-bottom: 1px solid var(--border-subtle);
   }
 }
+
+/* Interactive Topology Hint / Status Bar */
+.topology-hint-bar {
+  position: absolute;
+  top: 56px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(8, 14, 28, 0.95);
+  border: 1px solid var(--cyber-cyan-border);
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.35);
+  color: var(--cyber-cyan);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  padding: 6px 16px;
+  border-radius: 20px;
+  z-index: 15;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}

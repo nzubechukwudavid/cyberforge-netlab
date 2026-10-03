@@ -78,6 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     canvasEl: document.getElementById('topology-canvas'),
     networkGraph,
     packetEngine,
+    soundFx,
     onNodeSelect: (nodeId) => {
       cliParser.setActiveNode(nodeId);
       updateTerminalTabs(nodeId);
@@ -155,20 +156,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 8. Toolbar Buttons in Topology View
   const toolSelect = document.getElementById('tool-select');
+  const toolWire = document.getElementById('tool-wire');
   const toolCable = document.getElementById('tool-cable');
   const toolSniffer = document.getElementById('tool-sniffer');
   const toolReset = document.getElementById('tool-reset');
   const toolAddNode = document.getElementById('tool-add-node');
+  const toolDeleteNode = document.getElementById('tool-delete-node');
   const toolShareLab = document.getElementById('tool-share-lab');
 
-  [toolSelect, toolCable, toolSniffer].forEach(btn => {
+  [toolSelect, toolWire, toolCable, toolSniffer].forEach(btn => {
     if (!btn) return;
     btn.addEventListener('click', () => {
-      [toolSelect, toolCable, toolSniffer].forEach(b => b?.classList.remove('active'));
+      [toolSelect, toolWire, toolCable, toolSniffer].forEach(b => b?.classList.remove('active'));
       btn.classList.add('active');
       topologyCanvas.setTool(btn.getAttribute('data-tool'));
     });
   });
+
+  if (toolDeleteNode) {
+    toolDeleteNode.addEventListener('click', () => {
+      topologyCanvas.deleteSelected();
+    });
+  }
 
   if (toolReset) {
     toolReset.addEventListener('click', () => {
@@ -208,6 +217,13 @@ document.addEventListener('DOMContentLoaded', () => {
               <label style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:4px;">IP ADDRESS (Optional)</label>
               <input type="text" id="new-node-ip" placeholder="192.168.1.50" style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--border-subtle);color:var(--text-primary);padding:8px 12px;border-radius:6px;font-family:var(--font-mono);outline:none;" />
             </div>
+            <div>
+              <label style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:4px;">CONNECT TO DEVICE (Optional)</label>
+              <select id="new-node-link-target" style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--border-subtle);color:var(--text-primary);padding:8px 12px;border-radius:6px;font-family:var(--font-mono);outline:none;">
+                <option value="">-- Do Not Connect (Isolated) --</option>
+                ${Array.from(networkGraph.nodes.values()).map(n => `<option value="${n.id}">${n.name} (${n.type})</option>`).join('')}
+              </select>
+            </div>
           </div>
 
           <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px;">
@@ -224,13 +240,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const name = modal.querySelector('#new-node-name').value.trim() || 'Node';
         const ip = modal.querySelector('#new-node-ip').value.trim();
 
+        const connectTargetId = modal.querySelector('#new-node-link-target')?.value;
+
         const newNode = networkGraph.addNode({
           name,
           type,
-          x: 120 + Math.floor(Math.random() * 240),
-          y: 100 + Math.floor(Math.random() * 140),
+          x: 140 + Math.floor(Math.random() * 200),
+          y: 80 + Math.floor(Math.random() * 160),
           interfaces: [{ name: type === 'router' || type === 'switch' ? 'Gi0/1' : 'eth0', ip, subnetMask: '255.255.255.0' }]
         });
+
+        if (connectTargetId) {
+          networkGraph.addLink({
+            sourceNodeId: newNode.id,
+            targetNodeId: connectTargetId,
+            status: 'OPERATIONAL'
+          });
+        }
 
         topologyCanvas.selectedNodeId = newNode.id;
         topologyCanvas.render();

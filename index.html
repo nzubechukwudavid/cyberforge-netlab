@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>David Morah Nzubechukwu | CyberForge — NetLab & Systems Portfolio</title>
+  <meta name="description" content="Portfolio of David Morah Nzubechukwu: Computer Science graduate (UNILAG), CCNA aspirant, and creator of NetLab — an in-browser packet simulation and network troubleshooting engine.">
+  <meta name="theme-color" content="#05070d">
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="./manifest.json">
+
+  <!-- Typography: Inter, Outfit, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- CyberForge Design System Stylesheets -->
+  <link rel="stylesheet" href="./css/tokens.css">
+  <link rel="stylesheet" href="./css/cockpit.css">
+  <link rel="stylesheet" href="./css/netlab.css">
+  <link rel="stylesheet" href="./css/terminal.css">
+  <link rel="stylesheet" href="./css/wireshark.css">
+</head>
+<body>
+
+  <!-- ========================================================================
+       Tactical Telemetry HUD Header
+       ======================================================================== -->
+  <header class="cockpit-hud" id="cockpit-hud">
+    <div class="hud-left">
+      <div class="hud-badge">
+        <span class="pulse-dot"></span>
+        <span>SYSTEM: NOMINAL</span>
+      </div>
+      <div class="hud-telemetry-tag">
+        LOC: <span>LAGOS, NG [WAT]</span> // CCNA TRACK
+      </div>
+    </div>
+
+    <nav class="hud-nav" aria-label="Main Navigation">
+      <a href="#netlab" class="active">[01 // NETLAB]</a>
+      <a href="#arsenal">[02 // ARSENAL]</a>
+      <a href="#radar">[03 // RADAR]</a>
+      <a href="#dispatch">[04 // DISPATCH]</a>
+    </nav>
+
+    <div class="hud-actions">
+      <button id="btn-p2p-sync" class="hud-btn" title="Pair Mobile Device via P2P QR Code">
+        <span>⚡</span> Sync Phone
+      </button>
+      <button id="btn-audio-toggle" class="hud-btn active" title="Toggle Procedural Audio Synthesizer">
+        🔊 Audio: ON
+      </button>
+      <button id="btn-search-cmd" class="hud-btn" onclick="window.dispatchEvent(new KeyboardEvent('keydown', {ctrlKey: true, key: 'k'}))">
+        <span>⌘</span> <span class="kbd-shortcut">Ctrl+K</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       Hero Section & Interactive Mini-Terminal
+       ======================================================================== -->
+  <section class="hero-cockpit">
+    <div class="hero-bio">
+      <div class="tactical-tag">
+        <span>🛡️</span> INFRASTRUCTURE & SYSTEMS OPERATIONS COCKPIT
+      </div>
+      <h1 class="hero-title">
+        DAVID MORAH <br>
+        <span class="gradient-text">NZUBECHUKWU</span>
+      </h1>
+      <p class="hero-subtitle">
+        <strong>Network Systems & Cybersecurity Specialist</strong> based in Lagos, Nigeria. Computer Science graduate from the <strong>University of Lagos (UNILAG)</strong>. Preparing for <strong>Cisco CCNA 200-301</strong> with deep focus on OSI Layer 1–7 diagnostics, packet engineering, and threat triage.
+      </p>
+
+      <div class="hero-cta-group">
+        <a href="#netlab" class="btn-primary">
+          <span>⚡</span> Launch NetLab Simulator
+        </a>
+        <button id="btn-download-resume" class="btn-secondary">
+          <span>📄</span> Download ATS Resume (.md)
+        </button>
+      </div>
+
+      <!-- Live Telemetry Stat Ticker -->
+      <div class="stat-ticker">
+        <div class="stat-item">
+          <span class="stat-val">CCNA</span>
+          <span class="stat-lbl">200-301 Track</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-val">100%</span>
+          <span class="stat-lbl">Offline PWA</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-val">60 FPS</span>
+          <span class="stat-lbl">Particle Engine</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-val">0.00ms</span>
+          <span class="stat-lbl">Server Latency</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hero Interactive Console Terminal -->
+    <div class="terminal-container" style="min-height:300px;max-height:340px;">
+      <div class="terminal-header">
+        <div style="font-size:0.75rem;color:var(--cyber-cyan);display:flex;align-items:center;gap:6px;">
+          <span>💻</span> david@cyberforge-soc:~ (Interactive Mini-CLI)
+        </div>
+        <div style="font-size:0.7rem;color:var(--text-muted);">v2.1</div>
+      </div>
+      <div class="terminal-body" id="hero-cli-body">
+        <div class="term-line system-msg">[INITIALIZED] CyberForge Systems Telemetry v2.1 Active</div>
+        <div class="term-line">Type 'whoami', 'certs', or 'netlab' to query my profile:</div>
+      </div>
+      <div class="terminal-input-row">
+        <span class="term-prompt">david@cyberforge:~$</span>
+        <input type="text" id="hero-cli-input" class="term-input" placeholder="type a command (e.g. whoami)..." autocomplete="off" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       NetLab Flagship Interactive Simulator Workbench
+       ======================================================================== -->
+  <section class="cockpit-section" id="netlab">
+    <div class="section-header">
+      <div>
+        <div class="section-tag">01 // FLAGSHIP APPLICATION</div>
+        <h2 class="section-title">NetLab: In-Browser Network Simulator</h2>
+        <p class="section-desc">
+          An interactive, discrete-event packet simulation engine modeling OSI Layers 1 through 7. Troubleshoot broken enterprise topologies, configure Cisco IOS routing, inspect packet bytes in Pocket Wireshark, and resolve NOC incident tickets in real-time.
+        </p>
+      </div>
+
+      <!-- Scenario Selector Dropdown -->
+      <div style="display:flex;align-items:center;gap:10px;">
+        <label for="scenario-select" style="font-family:var(--font-mono);font-size:0.75rem;color:var(--cyber-cyan);text-transform:uppercase;">
+          Select Incident:
+        </label>
+        <select id="scenario-select" style="background:var(--bg-surface-raised);border:1px solid var(--cyber-cyan-border);color:var(--text-primary);font-family:var(--font-mono);font-size:0.8rem;padding:6px 12px;border-radius:6px;outline:none;cursor:pointer;">
+        </select>
+      </div>
+    </div>
+
+    <!-- Master Split-Pane Simulator Workbench -->
+    <div class="netlab-workbench">
+      
+      <!-- Left Pane: Dynamic SVG & Canvas Topology Viewport -->
+      <div class="topology-viewport">
+        <!-- Floating Canvas Toolbar -->
+        <div class="topology-toolbar">
+          <div class="toolbar-group">
+            <button id="tool-select" class="tool-btn active" data-tool="SELECT" title="Select & Move Devices">
+              <span>↖</span> Pointer
+            </button>
+            <button id="tool-cable" class="tool-btn" data-tool="CABLE" title="Click link to Cut / Resplice cable">
+              <span>✂</span> Cut/Splice
+            </button>
+            <button id="tool-sniffer" class="tool-btn" data-tool="SNIFFER" title="Attach Pocket Wireshark Sniffer Tap">
+              <span>🔍</span> Sniffer Tap
+            </button>
+          </div>
+
+          <div class="toolbar-group">
+            <button id="tool-add-node" class="tool-btn" title="Add New Network Device (Router, Switch, Host...)">
+              <span>+</span> Add Node
+            </button>
+            <button id="tool-share-lab" class="tool-btn" title="Export & Copy Shareable Lab URL">
+              <span>🔗</span> Share Lab
+            </button>
+            <button id="tool-reset" class="tool-btn" title="Reset Lab to Initial State">
+              <span>↺</span> Reset
+            </button>
+          </div>
+        </div>
+
+        <!-- Layered Visualizer Stage -->
+        <div class="topology-stage">
+          <svg id="topology-svg" class="topology-svg"></svg>
+          <canvas id="topology-canvas" class="topology-canvas"></canvas>
+        </div>
+      </div>
+
+      <!-- Right Pane: Incident Ticket HUD & Dual Terminal / Wireshark Dock -->
+      <div class="netlab-sidebar">
+        <!-- Live Incident Ticket Header -->
+        <div class="incident-ticket" id="incident-ticket-container">
+          <!-- Dynamically populated by ScenarioEngine.js -->
+        </div>
+
+        <!-- Dock Switcher Tabs -->
+        <div class="dock-nav">
+          <button id="tab-dock-terminal" class="dock-tab active">
+            <span>📟</span> Serial Terminal Console
+          </button>
+          <button id="tab-dock-wireshark" class="dock-tab">
+            <span>🔍</span> Pocket Wireshark Dissector
+          </button>
+        </div>
+
+        <!-- Dock Body: Terminal or Wireshark -->
+        <div class="dock-body">
+          <!-- Dock View 1: Terminal Console -->
+          <div id="dock-terminal-view" class="terminal-container" style="border:none;border-radius:0;">
+            <div class="terminal-header">
+              <div class="terminal-tabs" id="terminal-device-tabs">
+                <!-- Dynamically populated device tabs -->
+              </div>
+              <div class="terminal-controls">
+                <button class="term-btn" onclick="document.getElementById('terminal-body').innerHTML=''" title="Clear Screen">Clear</button>
+              </div>
+            </div>
+
+            <div class="terminal-body" id="terminal-body">
+              <!-- Output lines populated by CliParser.js -->
+            </div>
+
+            <!-- Mobile Cyber-Chips Drawer -->
+            <div class="cyber-chips-bar" id="cyber-chips-bar">
+              <!-- Dynamically populated touch chips -->
+            </div>
+
+            <div class="terminal-input-row">
+              <span class="term-prompt" id="terminal-prompt">Router&gt;</span>
+              <input type="text" id="terminal-input" class="term-input" placeholder="type command (or use chips above)..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+            </div>
+          </div>
+
+          <!-- Dock View 2: Pocket Wireshark Protocol Inspector -->
+          <div id="dock-wireshark-view" class="wireshark-container" style="display:none;">
+            <!-- Filter Bar -->
+            <div class="ws-filter-bar">
+              <span style="font-size:0.75rem;color:var(--cyber-cyan);">Filter:</span>
+              <input type="text" id="ws-filter-input" class="ws-filter-input" placeholder="e.g. icmp, arp, 192.168.1.1, drop..." />
+              <button id="btn-clear-ws" class="ws-btn">Clear Buffer</button>
+            </div>
+
+            <!-- Pane 1: Packet List -->
+            <div class="ws-packet-list-pane" id="ws-packet-list">
+              <!-- Populated by PacketInspector.js -->
+            </div>
+
+            <!-- Pane 2: Collapsible OSI Layer Tree -->
+            <div class="ws-details-pane" id="ws-details">
+              <div style="color:var(--text-muted);padding:8px;">No packet selected. Click any row above to inspect OSI headers.</div>
+            </div>
+
+            <!-- Pane 3: Raw Hex & ASCII Dump -->
+            <div class="ws-hex-pane" id="ws-hex">
+              <div style="color:var(--text-muted);padding:8px;">No packet data</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Project Arsenal (Holo-Deck) Showcase Section
+       ======================================================================== -->
+  <section class="cockpit-section" id="arsenal">
+    <div class="section-header">
+      <div>
+        <div class="section-tag">02 // VERIFIED SYSTEMS ARSENAL</div>
+        <h2 class="section-title">Engineering Projects & Research</h2>
+        <p class="section-desc">
+          Production systems, malware detection research, and distributed real-time platforms engineered with zero-cost deployment and high reliability.
+        </p>
+      </div>
+    </div>
+
+    <div class="arsenal-grid">
+      <!-- Project 1: NetLab Simulator -->
+      <article class="tactical-frame project-card">
+        <div>
+          <div class="project-badge-bar">
+            <span class="project-category">Flagship // Networking</span>
+            <span style="font-size:0.75rem;color:var(--terminal-emerald);font-family:var(--font-mono);">● Live Simulation</span>
+          </div>
+          <h3 class="project-title">NetLab Network Troubleshooting Engine</h3>
+          <p class="project-summary">
+            Discrete-event packet simulator modeling OSI Layers 1–7. Includes Cisco IOS CLI parser, 60fps glowing photon particle renderer, Pocket Wireshark protocol dissector, and automated corporate RCA generation.
+          </p>
+        </div>
+        <div>
+          <ul class="project-tech-tags">
+            <li class="tech-tag">CCNA 200-301</li>
+            <li class="tech-tag">Cisco IOS</li>
+            <li class="tech-tag">Wireshark</li>
+            <li class="tech-tag">Canvas / SVG</li>
+            <li class="tech-tag">P2P WebRTC</li>
+          </ul>
+          <div class="project-actions">
+            <a href="#netlab" class="btn-card-action">Launch Interactive Simulator →</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Project 2: PE Malware Benchmark -->
+      <article class="tactical-frame project-card">
+        <div>
+          <div class="project-badge-bar">
+            <span class="project-category">Cybersecurity // Research</span>
+            <span style="font-size:0.75rem;color:var(--cyber-cyan);font-family:var(--font-mono);">98.2% TPR</span>
+          </div>
+          <h3 class="project-title">PE Malware Detection & Analysis Benchmark</h3>
+          <p class="project-summary">
+            High-throughput static analysis pipeline for Windows Portable Executable (PE) files. Extracts section entropy, PE header flags, and import hashes (imphash) to evaluate machine learning detection without sandbox execution.
+          </p>
+        </div>
+        <div>
+          <ul class="project-tech-tags">
+            <li class="tech-tag">Python</li>
+            <li class="tech-tag">PE Header Parser</li>
+            <li class="tech-tag">Entropy Profiling</li>
+            <li class="tech-tag">EMBER Benchmark</li>
+            <li class="tech-tag">SOC Triage</li>
+          </ul>
+          <div class="project-actions">
+            <a href="#" id="btn-open-malware-modal" class="btn-card-action">Inspect Telemetry & ROC Curve →</a>
+          </div>
+        </div>
+      </article>
+
+      <!-- Project 3: Genshin Abyss Studio & Agentic Workflows -->
+      <article class="tactical-frame project-card">
+        <div>
+          <div class="project-badge-bar">
+            <span class="project-category">Automation // Multi-Agent</span>
+            <span style="font-size:0.75rem;color:var(--electric-violet);font-family:var(--font-mono);">Production Ready</span>
+          </div>
+          <h3 class="project-title">Agentic Workflows & Abyss Studio</h3>
+          <p class="project-summary">
+            Multi-agent automated reasoning framework orchestrating game telemetry, team composition heuristics, and structured LLM outputs with deterministic verification pipelines and rich visual frontends.
+          </p>
+        </div>
+        <div>
+          <ul class="project-tech-tags">
+            <li class="tech-tag">Agentic LLMs</li>
+            <li class="tech-tag">Python Directives</li>
+            <li class="tech-tag">State Pipelines</li>
+            <li class="tech-tag">Data Automation</li>
+          </ul>
+          <div class="project-actions">
+            <span class="btn-card-action" style="color:var(--text-muted);">Integrated Systems →</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Project 4: IT Security Study Cockpit -->
+      <article class="tactical-frame project-card">
+        <div>
+          <div class="project-badge-bar">
+            <span class="project-category">Systems // Productivity</span>
+            <span style="font-size:0.75rem;color:var(--terminal-emerald);font-family:var(--font-mono);">100% Offline</span>
+          </div>
+          <h3 class="project-title">IT Security Tracker & Study Cockpit</h3>
+          <p class="project-summary">
+            Gamified learning cockpit and spaced-repetition workstation engineered specifically for mastering the Cisco CCNA 200-301 curriculum, tracking study velocity, and practicing CLI reflex drills.
+          </p>
+        </div>
+        <div>
+          <ul class="project-tech-tags">
+            <li class="tech-tag">Spaced Repetition</li>
+            <li class="tech-tag">IndexedDB</li>
+            <li class="tech-tag">CCNA Domains</li>
+            <li class="tech-tag">Pomodoro HUD</li>
+          </ul>
+          <div class="project-actions">
+            <span class="btn-card-action" style="color:var(--text-muted);">Active Study Workstation →</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Project 5: RailHub Distributed Chat -->
+      <article class="tactical-frame project-card">
+        <div>
+          <div class="project-badge-bar">
+            <span class="project-category">Distributed Systems</span>
+            <span style="font-size:0.75rem;color:var(--cyber-cyan);font-family:var(--font-mono);">Sub-5ms Sync</span>
+          </div>
+          <h3 class="project-title">RailHub Real-Time Distributed Engine</h3>
+          <p class="project-summary">
+            Real-time multi-room messaging architecture built on distributed WebSockets, maintaining bi-directional state synchronization, client heartbeat monitoring, and instant reconnection recovery.
+          </p>
+        </div>
+        <div>
+          <ul class="project-tech-tags">
+            <li class="tech-tag">WebSockets</li>
+            <li class="tech-tag">State Sync</li>
+            <li class="tech-tag">Event-Driven</li>
+            <li class="tech-tag">Fault Recovery</li>
+          </ul>
+          <div class="project-actions">
+            <span class="btn-card-action" style="color:var(--text-muted);">High-Throughput Socket Engine →</span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       CCNA & Cyber Threat Matrix Radar Section
+       ======================================================================== -->
+  <section class="cockpit-section" id="radar">
+    <div class="section-header">
+      <div>
+        <div class="section-tag">03 // COMPETENCY MATRIX</div>
+        <h2 class="section-title">CCNA & Threat Hunting Radar</h2>
+        <p class="section-desc">
+          Holistic visualization of operational capabilities across Enterprise Networking, Threat Hunting, Linux Administration, Hardware Diagnostics, and Automation.
+        </p>
+      </div>
+    </div>
+
+    <div class="radar-layout">
+      <!-- Canvas Polygon Radar Chart -->
+      <div class="tactical-frame radar-canvas-container">
+        <canvas id="skills-radar-canvas"></canvas>
+      </div>
+
+      <!-- Skills Progress Breakdown -->
+      <div class="skills-breakdown">
+        <div class="skill-category-group">
+          <div class="skill-cat-title">
+            <span>Enterprise Networking (CCNA 200-301)</span>
+            <span>92%</span>
+          </div>
+          <div class="skill-bar-track">
+            <div class="skill-bar-fill" style="width:92%;"></div>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text-muted);">OSPF, VLANs, 802.1Q Trunks, STP, Subnetting, Gateway Redundancy</div>
+        </div>
+
+        <div class="skill-category-group">
+          <div class="skill-cat-title">
+            <span>Threat Hunting & SOC Diagnostics</span>
+            <span>88%</span>
+          </div>
+          <div class="skill-bar-track">
+            <div class="skill-bar-fill" style="width:88%;"></div>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text-muted);">Wireshark, Packet Dissection, PE Malware Static Analysis, SIEM Triage</div>
+        </div>
+
+        <div class="skill-category-group">
+          <div class="skill-cat-title">
+            <span>Linux Administration & Scripting</span>
+            <span>85%</span>
+          </div>
+          <div class="skill-bar-track">
+            <div class="skill-bar-fill" style="width:85%;"></div>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text-muted);">Debian/Ubuntu, systemd, Bash Scripting, Netfilter/Iptables, SSH Hardening</div>
+        </div>
+
+        <div class="skill-category-group">
+          <div class="skill-cat-title">
+            <span>Hardware & Incident Triage (CompTIA A+)</span>
+            <span>94%</span>
+          </div>
+          <div class="skill-bar-track">
+            <div class="skill-bar-fill" style="width:94%;"></div>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text-muted);">Component Diagnostics, Cable Termination, Root Cause Analysis (RCA)</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       SOC Dispatch & Contact Terminal Section
+       ======================================================================== -->
+  <section class="cockpit-section" id="dispatch">
+    <div class="section-header">
+      <div>
+        <div class="section-tag">04 // COMMUNICATIONS DISPATCH</div>
+        <h2 class="section-title">Initiate Contact / Hire David</h2>
+        <p class="section-desc">
+          Available for IT Support Specialist, Junior SOC Analyst, Network Systems Engineer, and Infrastructure roles. Open to remote or hybrid opportunities in Lagos.
+        </p>
+      </div>
+    </div>
+
+    <div class="tactical-frame" style="max-width:760px;margin:0 auto;padding:var(--space-2xl);">
+      <form id="dispatch-form" style="display:flex;flex-direction:column;gap:16px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <label for="contact-name" style="font-family:var(--font-mono);font-size:0.78rem;color:var(--cyber-cyan);display:block;margin-bottom:6px;">
+              OPERATOR / RECRUITER NAME *
+            </label>
+            <input type="text" id="contact-name" required placeholder="e.g. Sarah Jenkins (Hiring Manager)" 
+                   style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--border-subtle);color:var(--text-primary);font-family:var(--font-mono);font-size:0.85rem;padding:10px 14px;border-radius:6px;outline:none;" />
+          </div>
+
+          <div>
+            <label for="contact-email" style="font-family:var(--font-mono);font-size:0.78rem;color:var(--cyber-cyan);display:block;margin-bottom:6px;">
+              CORPORATE EMAIL *
+            </label>
+            <input type="email" id="contact-email" required placeholder="s.jenkins@enterprise.com" 
+                   style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--border-subtle);color:var(--text-primary);font-family:var(--font-mono);font-size:0.85rem;padding:10px 14px;border-radius:6px;outline:none;" />
+          </div>
+        </div>
+
+        <div>
+          <label for="contact-role" style="font-family:var(--font-mono);font-size:0.78rem;color:var(--cyber-cyan);display:block;margin-bottom:6px;">
+            ROLE / OPPORTUNITY SCOPE
+          </label>
+          <input type="text" id="contact-role" placeholder="e.g. Network Systems Engineer / SOC Analyst" 
+                 style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--border-subtle);color:var(--text-primary);font-family:var(--font-mono);font-size:0.85rem;padding:10px 14px;border-radius:6px;outline:none;" />
+        </div>
+
+        <div>
+          <label for="contact-msg" style="font-family:var(--font-mono);font-size:0.78rem;color:var(--cyber-cyan);display:block;margin-bottom:6px;">
+            MESSAGE TELEMETRY PAYLOAD *
+          </label>
+          <textarea id="contact-msg" rows="4" required placeholder="Describe your team, role scope, or interview scheduling..." 
+                    style="width:100%;background:rgba(0,0,0,0.4);border:1px solid var(--border-subtle);color:var(--text-primary);font-family:var(--font-mono);font-size:0.85rem;padding:10px 14px;border-radius:6px;outline:none;resize:vertical;"></textarea>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:6px;">
+          <div id="dispatch-status" style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text-muted);">
+            Ready for dispatch transmission.
+          </div>
+          <button type="submit" class="btn-primary" style="padding:12px 24px;">
+            <span>📡</span> Dispatch Message
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       Tactical Footer
+       ======================================================================== -->
+  <footer style="border-top:1px solid var(--border-subtle);padding:var(--space-2xl) var(--space-lg);text-align:center;font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);background:rgba(5,7,13,0.95);position:relative;z-index:var(--z-base);">
+    <div style="max-width:1380px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+      <div>
+        © 2026 <strong>David Morah Nzubechukwu</strong>. All Systems Operational.
+      </div>
+      <div style="color:var(--cyber-cyan);">
+        Engineered with Pure Vanilla Web Standards // 100% Offline PWA Ready
+      </div>
+    </div>
+  </footer>
+
+  <!-- Master JavaScript Application -->
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "name": "CyberForge: NetLab & Systems Portfolio",
+  "short_name": "CyberForge",
+  "description": "Interactive in-browser packet simulator, Pocket Wireshark, and Systems Engineering Portfolio by David Morah Nzubechukwu.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#05070d",
+  "theme_color": "#05070d",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%2305070d' stroke='%2300f0ff' stroke-width='4'/><path d='M25 50 L50 25 L75 50 L50 75 Z' fill='%2300f0ff'/></svg>",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

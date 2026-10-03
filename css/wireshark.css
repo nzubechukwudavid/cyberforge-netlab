@@ -1,0 +1,191 @@
+/* ==========================================================================
+   CyberForge - Pocket Wireshark Protocol Inspector Styles
+   3-Pane Frame Dissector: Packet List, OSI Tree, & Hex/ASCII Dump
+   ========================================================================== */
+
+.wireshark-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #060912;
+  font-family: var(--font-mono);
+  overflow: hidden;
+}
+
+/* Wireshark Filter & Controls Bar */
+.ws-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: rgba(14, 20, 36, 0.95);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.ws-filter-input {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  outline: none;
+}
+
+.ws-filter-input:focus {
+  border-color: var(--cyber-cyan);
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+}
+
+.ws-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.ws-btn:hover {
+  background: var(--cyber-cyan-dim);
+  border-color: var(--cyber-cyan);
+  color: var(--cyber-cyan);
+}
+
+/* Pane 1: Packet List Table */
+.ws-packet-list-pane {
+  flex: 1.2;
+  overflow-y: auto;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.ws-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.74rem;
+  text-align: left;
+}
+
+.ws-table th {
+  position: sticky;
+  top: 0;
+  background: #0f172a;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border-subtle);
+  user-select: none;
+}
+
+.ws-table td {
+  padding: 3px 8px;
+  white-space: nowrap;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.ws-row {
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.ws-row:hover {
+  background: rgba(0, 240, 255, 0.08);
+}
+
+.ws-row.selected {
+  background: rgba(0, 240, 255, 0.18) !important;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+/* Wireshark Protocol Color Highlights */
+.proto-icmp { background: rgba(0, 240, 255, 0.06); color: #38bdf8; }
+.proto-arp  { background: rgba(245, 158, 11, 0.06); color: #fbbf24; }
+.proto-dns  { background: rgba(139, 92, 246, 0.06); color: #c084fc; }
+.proto-tcp  { background: rgba(16, 185, 129, 0.06); color: #34d399; }
+.proto-http { background: rgba(52, 211, 153, 0.06); color: #6ee7b7; }
+.proto-drop { background: rgba(239, 68, 68, 0.08); color: #f87171; }
+
+/* Pane 2: Collapsible OSI Layer Tree */
+.ws-details-pane {
+  flex: 1;
+  overflow-y: auto;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(7, 10, 20, 0.95);
+  font-size: 0.74rem;
+}
+
+.tree-node {
+  margin-bottom: 3px;
+}
+
+.tree-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 2px 4px;
+  border-radius: 3px;
+  user-select: none;
+}
+
+.tree-header:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--cyber-cyan);
+}
+
+.tree-children {
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 2px;
+  color: var(--text-muted);
+}
+
+.tree-leaf {
+  padding: 1px 4px;
+}
+
+.tree-leaf strong {
+  color: var(--text-secondary);
+}
+
+/* Pane 3: Raw Hex & ASCII Dump */
+.ws-hex-pane {
+  height: 120px;
+  overflow-y: auto;
+  padding: 6px 10px;
+  background: #04060d;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: #94a3b8;
+  user-select: text;
+}
+
+.hex-line {
+  display: flex;
+  gap: 16px;
+}
+
+.hex-offset {
+  color: var(--text-muted);
+  width: 44px;
+}
+
+.hex-bytes {
+  color: #38bdf8;
+  letter-spacing: 0.08em;
+}
+
+.hex-ascii {
+  color: var(--text-secondary);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  padding-left: 12px;
+}

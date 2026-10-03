@@ -1,0 +1,98 @@
+/* ==========================================================================
+   CyberForge Design System - Core Tokens
+   Theme: High-Tech Cyber Intelligence & Tactical SOC Cockpit
+   ========================================================================== */
+
+:root {
+  /* Color Palette - Obsidian Void & Deep Slate */
+  --bg-deep: #05070d;
+  --bg-surface: #0a0e1a;
+  --bg-surface-raised: #0f1629;
+  --bg-card: rgba(13, 20, 36, 0.72);
+  --bg-card-hover: rgba(18, 28, 52, 0.85);
+  --bg-overlay: rgba(5, 7, 13, 0.88);
+
+  /* Primary Cyber Accents */
+  --cyber-cyan: #00f0ff;
+  --cyber-cyan-dim: rgba(0, 240, 255, 0.15);
+  --cyber-cyan-glow: 0 0 20px rgba(0, 240, 255, 0.45);
+  --cyber-cyan-border: rgba(0, 240, 255, 0.28);
+
+  /* Secondary Accents */
+  --electric-violet: #8b5cf6;
+  --electric-violet-dim: rgba(139, 92, 246, 0.18);
+  --electric-violet-glow: 0 0 20px rgba(139, 92, 246, 0.45);
+  --electric-violet-border: rgba(139, 92, 246, 0.35);
+
+  /* Telemetry Status Colors */
+  --terminal-emerald: #10b981;
+  --terminal-emerald-dim: rgba(16, 185, 129, 0.15);
+  --terminal-emerald-glow: 0 0 15px rgba(16, 185, 129, 0.45);
+  
+  --hazard-amber: #f59e0b;
+  --hazard-amber-dim: rgba(245, 158, 11, 0.18);
+  --hazard-amber-glow: 0 0 15px rgba(245, 158, 11, 0.45);
+
+  --alert-crimson: #ef4444;
+  --alert-crimson-dim: rgba(239, 68, 68, 0.18);
+  --alert-crimson-glow: 0 0 15px rgba(239, 68, 68, 0.5);
+
+  /* Neutral Text & Grayscale */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+  --text-dark: #334155;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-grid: rgba(0, 240, 255, 0.04);
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  --font-display: 'Outfit', var(--font-sans);
+
+  /* Spacing Scale */
+  --space-2xs: 0.25rem;  /* 4px */
+  --space-xs: 0.5rem;    /* 8px */
+  --space-sm: 0.75rem;   /* 12px */
+  --space-md: 1rem;      /* 16px */
+  --space-lg: 1.5rem;    /* 24px */
+  --space-xl: 2rem;      /* 32px */
+  --space-2xl: 3rem;     /* 48px */
+  --space-3xl: 4rem;     /* 64px */
+
+  /* Glassmorphism & Elevation */
+  --glass-blur: blur(14px);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.55);
+  --card-radius: 12px;
+  --button-radius: 8px;
+  --terminal-radius: 10px;
+
+  /* Transitions */
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms var(--ease-spring);
+  --transition-slow: 400ms var(--ease-spring);
+
+  /* Z-Index Hierarchy */
+  --z-canvas: 1;
+  --z-base: 10;
+  --z-hud: 100;
+  --z-drawer: 200;
+  --z-modal: 500;
+  --z-palette: 1000;
+  --z-toast: 2000;
+}
+
+/* Light Scanline & Vignette Effect Variables */
+.scanline-overlay {
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  ), linear-gradient(
+    90deg,
+    rgba(255, 0, 0, 0.03),
+    rgba(0, 255, 0, 0.01),
+    rgba(0, 0, 255, 0.03)
+  );
+  background-size: 100% 3px, 6px 100%;
+}

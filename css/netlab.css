@@ -1,0 +1,338 @@
+/* ==========================================================================
+   CyberForge - NetLab Interactive Simulator Styles
+   Topology Canvas, Incident Ticket HUD, & Split-Pane Layout
+   ========================================================================== */
+
+.netlab-workbench {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: var(--space-md);
+  min-height: 640px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  box-shadow: var(--glass-shadow);
+  position: relative;
+}
+
+/* ==========================================================================
+   Left Pane: Topology Canvas & Toolbar
+   ========================================================================== */
+.topology-viewport {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(circle at center, #0c1224 0%, #060914 100%);
+  border-right: 1px solid var(--border-subtle);
+  overflow: hidden;
+  touch-action: none; /* For custom touch pinch/pan */
+}
+
+/* Canvas Toolbar Overlay */
+.topology-toolbar {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(10, 16, 30, 0.88);
+  backdrop-filter: var(--glass-blur);
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  pointer-events: auto;
+}
+
+.tool-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--transition-fast);
+}
+
+.tool-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--cyber-cyan);
+}
+
+.tool-btn.active {
+  background: var(--cyber-cyan-dim);
+  border-color: var(--cyber-cyan);
+  color: var(--cyber-cyan);
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+}
+
+/* SVG and Canvas Layering */
+.topology-stage {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+}
+
+.topology-stage:active {
+  cursor: grabbing;
+}
+
+.topology-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+.topology-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none; /* Lets SVG catch clicks */
+}
+
+/* Node Glyphs & Interactive Elements in SVG */
+.node-group {
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.node-group:hover {
+  filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.6));
+}
+
+.node-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--text-primary);
+  text-anchor: middle;
+  font-weight: 600;
+  user-select: none;
+}
+
+.node-sublabel {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  fill: var(--cyber-cyan);
+  text-anchor: middle;
+  user-select: none;
+}
+
+.link-line {
+  stroke-width: 2.5;
+  stroke: rgba(0, 240, 255, 0.35);
+  transition: stroke 0.3s, stroke-width 0.3s;
+}
+
+.link-line.operational {
+  stroke: var(--terminal-emerald);
+}
+
+.link-line.degraded {
+  stroke: var(--hazard-amber);
+  stroke-dasharray: 4 2;
+}
+
+.link-line.severed {
+  stroke: var(--alert-crimson);
+  stroke-dasharray: 6 4;
+}
+
+/* Sniffer Tap Badge on Link */
+.sniffer-tap-badge {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.sniffer-tap-badge:hover {
+  transform: scale(1.2);
+}
+
+/* ==========================================================================
+   Right Pane: Incident HUD, Terminal, Wireshark Dock
+   ========================================================================== */
+.netlab-sidebar {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-surface-raised);
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Incident Ticket Card */
+.incident-ticket {
+  padding: 12px 16px;
+  background: rgba(13, 20, 36, 0.95);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ticket-id {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--cyber-cyan);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ticket-severity {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.severity-critical {
+  background: var(--alert-crimson-dim);
+  border: 1px solid var(--alert-crimson);
+  color: var(--alert-crimson);
+}
+
+.severity-elevated {
+  background: var(--hazard-amber-dim);
+  border: 1px solid var(--hazard-amber);
+  color: var(--hazard-amber);
+}
+
+.severity-resolved {
+  background: var(--terminal-emerald-dim);
+  border: 1px solid var(--terminal-emerald);
+  color: var(--terminal-emerald);
+}
+
+.ticket-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.ticket-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.ticket-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+.check-item.completed {
+  color: var(--terminal-emerald);
+}
+
+.check-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+
+.check-item.completed .check-box {
+  background: var(--terminal-emerald);
+  border-color: var(--terminal-emerald);
+  color: #040810;
+}
+
+/* Dock View Switcher (Terminal vs Pocket Wireshark) */
+.dock-nav {
+  display: flex;
+  align-items: center;
+  background: rgba(8, 12, 22, 0.95);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 0 12px;
+}
+
+.dock-tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  padding: 10px 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--transition-fast);
+}
+
+.dock-tab:hover {
+  color: var(--text-primary);
+}
+
+.dock-tab.active {
+  color: var(--cyber-cyan);
+  border-bottom-color: var(--cyber-cyan);
+  font-weight: 600;
+}
+
+.dock-body {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   Responsive Adaptations & Mobile Drawer
+   ========================================================================== */
+@media (max-width: 960px) {
+  .netlab-workbench {
+    grid-template-columns: 1fr;
+    grid-template-rows: 380px 420px;
+    height: auto;
+  }
+  .topology-viewport {
+    border-right: none;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+}

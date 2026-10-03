@@ -68,15 +68,12 @@ export class PacketEngine {
 
     // Step 1: Trace Path through Network Topology
     const pathResult = this.resolvePath(srcNode, targetIp);
-    if (!pathResult.success) {
-      return { success: false, error: pathResult.reason, dropNode: pathResult.dropNode };
-    }
 
     // Step 2: Create ICMP Echo Request Packet
     const icmpReq = new Packet({
       type: 'ICMP_REQ',
       srcNodeId: srcNode.id,
-      dstNodeId: pathResult.targetNode.id,
+      dstNodeId: pathResult.targetNode ? pathResult.targetNode.id : null,
       srcIp: srcIface.ip,
       dstIp: targetIp,
       srcMac: srcIface.mac,
@@ -85,6 +82,13 @@ export class PacketEngine {
       protocol: 'ICMP',
       payload: { seq: 1, bytes: 32 }
     });
+
+    if (!pathResult.success) {
+      icmpReq.status = 'DROPPED';
+      icmpReq.dropReason = pathResult.reason;
+      this.recordPacket(icmpReq);
+      return { success: false, error: pathResult.reason, dropNode: pathResult.dropNode };
+    }
 
     this.recordPacket(icmpReq);
     this.emit('PACKET_TRANSMIT', { packet: icmpReq, hops: pathResult.hops, reverse: false });
@@ -132,7 +136,6 @@ export class PacketEngine {
   async resolveDns(srcNode, domain) {
     if (!srcNode.dns) return { success: false, reason: 'DNS server not configured' };
 
-    // Standard hardcoded demo zone records for labs
     const dnsRecords = {
       'portal.internal.corp': '10.0.5.10',
       'web.intranet': '192.168.10.80',
@@ -145,7 +148,6 @@ export class PacketEngine {
       return { success: false, reason: `*** UnKnown can't find ${domain}: Non-existent domain` };
     }
 
-    // Trace path to DNS server
     const dnsPath = this.resolvePath(srcNode, srcNode.dns);
     if (!dnsPath.success) {
       return { success: false, reason: `DNS request timed out. DNS Server ${srcNode.dns} unreachable.` };
@@ -155,20 +157,18 @@ export class PacketEngine {
   }
 
   /**
-   * Path Resolution Algorithm across Topology Graph
+   * Path Resolution Algorithm across Topology Graph (with Layer 2 Switch support)
    */
   resolvePath(srcNode, destIp) {
     const visitedNodes = new Set([srcNode.id]);
-    const hops = []; // Array of link objects
+    const hops = [];
     let currentNode = srcNode;
     let targetNode = null;
 
-    // Check if target is immediately on same node
     for (const iface of srcNode.interfaces) {
       if (iface.ip === destIp) return { success: true, targetNode: srcNode, hops: [] };
     }
 
-    // Find destination node in graph
     for (const node of this.graph.nodes.values()) {
       if (node.interfaces.some(i => i.ip === destIp)) {
         targetNode = node;
@@ -177,48 +177,59 @@ export class PacketEngine {
     }
 
     if (!targetNode) {
-      // Might be an internet / cloud destination beyond edge router
       targetNode = this.graph.getNodeByName('Cloud') || this.graph.getNodeByName('Internet');
     }
 
-    // Step-by-step next-hop forwarder
     let maxHops = 12;
     while (maxHops-- > 0) {
-      // 1. Check if direct connected on current node
-      const matchingRoute = this.graph.lookupRoute(currentNode, destIp);
-      if (!matchingRoute) {
-        return { success: false, reason: `Destination host unreachable: No route to ${destIp} on ${currentNode.name}`, dropNode: currentNode };
-      }
-
-      // 2. Find outgoing link
       let outgoingLink = null;
-      for (const link of this.graph.links.values()) {
-        if (
-          (link.sourceNodeId === currentNode.id && link.sourceInterface === matchingRoute.interface) ||
-          (link.targetNodeId === currentNode.id && link.targetInterface === matchingRoute.interface)
-        ) {
-          outgoingLink = link;
-          break;
-        }
-      }
 
-      if (!outgoingLink) {
-        // Fallback: look for any link from this interface
+      if (currentNode.type === 'switch') {
+        // Layer 2 Switch: forward through connected link to next unvisited node
         for (const link of this.graph.links.values()) {
-          if (link.sourceNodeId === currentNode.id || link.targetNodeId === currentNode.id) {
+          const isConnected = link.sourceNodeId === currentNode.id || link.targetNodeId === currentNode.id;
+          const otherNodeId = link.sourceNodeId === currentNode.id ? link.targetNodeId : link.sourceNodeId;
+          if (isConnected && !visitedNodes.has(otherNodeId)) {
             outgoingLink = link;
             break;
+          }
+        }
+      } else {
+        // Layer 3 Router / Host: routing table lookup
+        const matchingRoute = this.graph.lookupRoute(currentNode, destIp);
+        if (!matchingRoute) {
+          return { success: false, reason: `Destination host unreachable: No route to ${destIp} on ${currentNode.name}`, dropNode: currentNode };
+        }
+
+        for (const link of this.graph.links.values()) {
+          if (
+            (link.sourceNodeId === currentNode.id && link.sourceInterface === matchingRoute.interface) ||
+            (link.targetNodeId === currentNode.id && link.targetInterface === matchingRoute.interface)
+          ) {
+            outgoingLink = link;
+            break;
+          }
+        }
+
+        if (!outgoingLink) {
+          for (const link of this.graph.links.values()) {
+            if (link.sourceNodeId === currentNode.id || link.targetNodeId === currentNode.id) {
+              const otherNodeId = link.sourceNodeId === currentNode.id ? link.targetNodeId : link.sourceNodeId;
+              if (!visitedNodes.has(otherNodeId)) {
+                outgoingLink = link;
+                break;
+              }
+            }
           }
         }
       }
 
       if (!outgoingLink) {
-        return { success: false, reason: `Interface ${matchingRoute.interface} on ${currentNode.name} is not connected to any cable`, dropNode: currentNode };
+        return { success: false, reason: `No active outgoing cable connected from ${currentNode.name}`, dropNode: currentNode };
       }
 
       hops.push(outgoingLink);
 
-      // Determine next node
       const nextNodeId = outgoingLink.sourceNodeId === currentNode.id ? outgoingLink.targetNodeId : outgoingLink.sourceNodeId;
       const nextNode = this.graph.getNode(nextNodeId);
 
@@ -226,7 +237,6 @@ export class PacketEngine {
         return { success: false, reason: `Cable terminates at disconnected port`, dropNode: currentNode };
       }
 
-      // Check if we arrived at target
       if (nextNode.id === targetNode?.id || nextNode.interfaces.some(i => i.ip === destIp)) {
         return { success: true, targetNode: nextNode, hops, nextHopMac: nextNode.interfaces[0]?.mac };
       }
@@ -242,16 +252,12 @@ export class PacketEngine {
     return { success: false, reason: `TTL expired in transit (hop limit exceeded)` };
   }
 
-  /**
-   * Hop & ACL Validation Check
-   */
   evaluateHops(hops, packet) {
     for (const link of hops) {
       if (link.status === 'SEVERED') {
         return { dropped: true, hop: link, reason: `Packet dropped: Cable link ${link.id} is physically severed` };
       }
       
-      // Check firewall ACLs on source or target node of link
       const srcNode = this.graph.getNode(link.sourceNodeId);
       const dstNode = this.graph.getNode(link.targetNodeId);
 

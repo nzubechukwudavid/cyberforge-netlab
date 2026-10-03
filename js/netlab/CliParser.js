@@ -26,7 +26,6 @@ export class CliParser {
     this.activeNodeId = nodeId;
     const node = this.graph.getNode(nodeId);
     if (!node) return;
-
     this.updatePrompt();
     this.updateCyberChips();
     this.printLine(`[CONSOLE ATTACHED] Connected to serial console of ${node.name} (${node.type.toUpperCase()})`, 'system-msg');
@@ -153,6 +152,7 @@ export class CliParser {
       await this.executeHostCommand(node, cmd, args);
     }
 
+    this.graph.notify('COMMAND_EXECUTED', { node, cmd });
     this.updatePrompt();
     this.updateCyberChips();
   }
@@ -530,6 +530,7 @@ export class CliParser {
         if (this.inputEl) {
           this.inputEl.value = chipText;
           this.inputEl.focus();
+          this.execute(chipText);
         }
       });
       this.chipsContainer.appendChild(chipBtn);
@@ -553,3 +554,5 @@ export class CliParser {
     }
   }
 }
+
+

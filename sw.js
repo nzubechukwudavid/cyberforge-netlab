@@ -4,7 +4,7 @@
  * ============================================================================
  */
 
-const CACHE_NAME = 'cyberforge-v2.1';
+const CACHE_NAME = 'cyberforge-v2.2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -63,3 +63,4 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+

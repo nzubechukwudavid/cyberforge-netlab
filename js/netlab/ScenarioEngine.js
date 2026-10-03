@@ -207,7 +207,7 @@ export class ScenarioEngine {
 
     modal.querySelector('#btn-export-rca').addEventListener('click', () => {
       modal.remove();
-      const rcaEvent = new CustomEvent('GENERATE_RCA', { detail: { scenario: this.activeScenario, time: this.elapsedSeconds, score: this.score } });
+      const rcaEvent = new CustomEvent('GENERATE_RCA', { detail: { scenario: this.activeScenario, timeSeconds: this.elapsedSeconds, time: this.elapsedSeconds, score: this.score } });
       window.dispatchEvent(rcaEvent);
     });
   }

@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const hash = networkGraph.exportToUrlHash();
       const shareUrl = `${window.location.origin}${window.location.pathname}#lab=${hash}`;
       window.location.hash = `lab=${hash}`;
-      navigator.clipboard.writeText(shareUrl);
+      if (navigator.clipboard?.writeText) { navigator.clipboard.writeText(shareUrl).catch(() => {}); }
 
       toolShareLab.innerHTML = '<span>✓</span> Copied Link!';
       soundFx.playSuccess();
@@ -414,3 +414,4 @@ document.addEventListener('DOMContentLoaded', () => {
       .catch(err => console.warn('ServiceWorker registration error:', err));
   }
 });
+

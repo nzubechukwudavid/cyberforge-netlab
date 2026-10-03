@@ -7,7 +7,8 @@
  */
 
 export class RcaGenerator {
-  static generateReport({ scenario, timeSeconds, score }) {
+  static generateReport({ scenario, timeSeconds, time, score }) {
+    const ttr = (timeSeconds !== undefined) ? timeSeconds : (time !== undefined ? time : 0);
     const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
 
     const markdown = `# 🛡️ INCIDENT POST-MORTEM & ROOT CAUSE ANALYSIS (RCA)
@@ -15,13 +16,13 @@ export class RcaGenerator {
 **Classification:** Internal NOC / Security Engineering Report  
 **Lead Systems Engineer:** David Morah Nzubechukwu (CCNA Aspirant & Systems Specialist)  
 **Date/Time of Resolution:** ${timestamp}  
-**Time to Remediate (TTR):** ${timeSeconds} seconds  
+**Time to Remediate (TTR):** ${ttr} seconds  
 **Quality Score:** ${score} / 1000  
 
 ---
 
 ## 1. Executive Summary
-On ${timestamp.substring(0, 10)}, an enterprise connectivity incident (${scenario.id}) was detected impacting **${scenario.title}**. Outbound communications and critical network services were disrupted across the affected segment. Remediative actions were initiated, restoring full service availability within ${timeSeconds} seconds.
+On ${timestamp.substring(0, 10)}, an enterprise connectivity incident (${scenario.id}) was detected impacting **${scenario.title}**. Outbound communications and critical network services were disrupted across the affected segment. Remediative actions were initiated, restoring full service availability within ${ttr} seconds.
 
 ## 2. Incident Classification & Symptoms
 - **Incident ID:** ${scenario.id}

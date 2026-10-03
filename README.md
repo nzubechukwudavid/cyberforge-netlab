@@ -1,7 +1,6 @@
 # 🌐 CyberForge: NetLab & The Systems Portfolio
 ### High-Fidelity Packet Simulation Engine & Cybersecurity Systems Cockpit
-**Architected & Developed by:** David Morah Nzubechukwu  
-**Degree:** B.Sc. Computer Science, University of Lagos (UNILAG), Nigeria  
+**Architected & Developed by:** David Morah  
 **Track:** Cisco Certified Network Associate (CCNA 200-301) // SOC & IT Infrastructure  
 **License:** MIT // 100% Free & Open-Source  
 

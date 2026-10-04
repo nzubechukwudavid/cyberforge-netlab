@@ -318,18 +318,18 @@ export class CliParser {
    */
   async executeHostCommand(node, cmd, args) {
     if (cmd === 'ipconfig' || cmd === 'ifconfig') {
-      if (args[0] === '/setgateway') {
+      if (args[0] === '/setgateway' || args[0] === '/gateway' || args[0] === '-g') {
         node.gateway = args[1] || '';
         node.initDefaultRoutes();
         this.printLine(`Default gateway updated to ${args[1]}`, 'success-msg');
         return;
       }
-      if (args[0] === '/setdns') {
+      if (args[0] === '/setdns' || args[0] === '/dns' || args[0] === '-d') {
         node.dns = args[1] || '';
         this.printLine(`DNS server updated to ${args[1]}`, 'success-msg');
         return;
       }
-      if (args[0] === '/setmask') {
+      if (args[0] === '/setmask' || args[0] === '/mask' || args[0] === '-m') {
         if (node.interfaces[0]) {
           node.interfaces[0].subnetMask = args[1] || '255.255.255.0';
           node.initDefaultRoutes();

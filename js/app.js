@@ -439,5 +439,18 @@ document.addEventListener('DOMContentLoaded', () => {
       .then(() => console.log('✓ CyberForge ServiceWorker active: 100% offline ready.'))
       .catch(err => console.warn('ServiceWorker registration error:', err));
   }
+
+  // Expose global netlabApp for telemetry, inspection, and automated testing
+  window.netlabApp = {
+    graph: networkGraph,
+    packetEngine,
+    packetInspector,
+    cliParser,
+    canvas: topologyCanvas,
+    scenarioEngine,
+    rcaGenerator: RcaGenerator,
+    p2pSync,
+    soundFx
+  };
 });
 

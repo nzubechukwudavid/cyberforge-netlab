@@ -25,6 +25,10 @@ export class SoundEngine {
     return this.muted;
   }
 
+  playKeypress() {
+    this.playKeyClick();
+  }
+
   playKeyClick() {
     if (this.muted) return;
     this.init();

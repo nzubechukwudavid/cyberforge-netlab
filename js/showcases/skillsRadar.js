@@ -58,7 +58,7 @@ export class SkillsRadar {
     const size = parseFloat(this.canvas.style.width) || 360;
     const centerX = size / 2;
     const centerY = size / 2;
-    const radius = size * 0.38;
+    const radius = size * 0.25;
     const total = this.skills.length;
 
     this.ctx.clearRect(0, 0, size, size);

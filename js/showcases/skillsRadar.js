@@ -11,12 +11,12 @@ export class SkillsRadar {
     this.ctx = canvasEl ? canvasEl.getContext('2d') : null;
 
     this.skills = [
-      { label: 'L2/L3 Routing (CCNA)', value: 0.92, full: 'OSPF, VLANs, Trunks, STP, Subnetting' },
-      { label: 'Threat Hunting & SOC', value: 0.88, full: 'Wireshark, SIEM Triage, Malware Telemetry' },
-      { label: 'Linux & Scripting', value: 0.85, full: 'Bash, Python, Systemd, Netfilter/Iptables' },
-      { label: 'Firewall & ACLs', value: 0.82, full: 'Stateful Filtering, NAT/PAT, Port Security' },
-      { label: 'Systems Triage & HW', value: 0.94, full: 'CompTIA A+, Incident RCA, Disaster Recovery' },
-      { label: 'Agentic Workflows', value: 0.90, full: 'LLM Orchestration, Python Automation' }
+      { label: ['L2/L3 Routing', '(CCNA)'], value: 0.92, full: 'OSPF, VLANs, Trunks, STP, Subnetting' },
+      { label: ['Threat Hunting', '& SOC'], value: 0.88, full: 'Wireshark, SIEM Triage, Malware Telemetry' },
+      { label: ['Linux Admin', '& Scripting'], value: 0.85, full: 'Bash, Python, Systemd, Netfilter/Iptables' },
+      { label: ['Firewall', '& ACLs'], value: 0.82, full: 'Stateful Filtering, NAT/PAT, Port Security' },
+      { label: ['Hardware', '& Sys Triage'], value: 0.94, full: 'CompTIA A+, Incident RCA, Disaster Recovery' },
+      { label: ['Agentic', 'Workflows'], value: 0.90, full: 'LLM Orchestration, Python Automation' }
     ];
 
     this.animationProgress = 0;
@@ -58,7 +58,7 @@ export class SkillsRadar {
     const size = parseFloat(this.canvas.style.width) || 360;
     const centerX = size / 2;
     const centerY = size / 2;
-    const radius = size * 0.25;
+    const radius = size * 0.27;
     const total = this.skills.length;
 
     this.ctx.clearRect(0, 0, size, size);
@@ -101,7 +101,12 @@ export class SkillsRadar {
       this.ctx.font = '10px JetBrains Mono, monospace';
       this.ctx.textAlign = Math.abs(Math.cos(angle)) < 0.2 ? 'center' : Math.cos(angle) > 0 ? 'left' : 'right';
       this.ctx.textBaseline = 'middle';
-      this.ctx.fillText(this.skills[i].label, lx, ly);
+      const lines = Array.isArray(this.skills[i].label) ? this.skills[i].label : [this.skills[i].label];
+      const lh = 12;
+      const sy = ly - ((lines.length - 1) * lh) / 2;
+      lines.forEach((line, idx) => {
+        this.ctx.fillText(line, lx, sy + (idx * lh));
+      });
     }
 
     // Draw polygon

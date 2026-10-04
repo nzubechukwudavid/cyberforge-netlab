@@ -9,6 +9,7 @@ const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
+  './favicon.svg',
   './css/tokens.css',
   './css/cockpit.css',
   './css/netlab.css',

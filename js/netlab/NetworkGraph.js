@@ -113,7 +113,7 @@ export class NetworkNode {
 }
 
 export class NetworkLink {
-  constructor({ id, sourceNodeId, sourceInterface, targetNodeId, targetInterface, status = 'OPERATIONAL', latency = 4 }) {
+  constructor({ id, sourceNodeId, sourceInterface, targetNodeId, targetInterface, status = 'OPERATIONAL', latency = 4, mediaType = 'COPPER_STRAIGHT' }) {
     this.id = id || `link-${Math.random().toString(36).substr(2, 6)}`;
     this.sourceNodeId = sourceNodeId;
     this.sourceInterface = sourceInterface;
@@ -121,6 +121,7 @@ export class NetworkLink {
     this.targetInterface = targetInterface;
     this.status = status; // 'OPERATIONAL' | 'SEVERED' | 'DEGRADED'
     this.latency = latency; // Simulated latency in ms
+    this.mediaType = mediaType; // 'COPPER_STRAIGHT' | 'COPPER_CROSS' | 'FIBER' | 'SERIAL'
     this.hasSnifferTap = false;
   }
 }

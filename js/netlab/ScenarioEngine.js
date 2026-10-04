@@ -106,6 +106,9 @@ export class ScenarioEngine {
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
           <span style="font-family:var(--font-mono);font-size:0.75rem;color:var(--text-muted);" id="ticket-timer">00:00</span>
+          <button id="btn-trigger-sop-replay" title="Autonomous SOP Diagnostic Replay" style="background:transparent;border:1px solid rgba(0,240,255,0.3);color:var(--cyber-cyan);font-family:var(--font-mono);font-size:0.68rem;padding:2px 6px;border-radius:4px;cursor:pointer;opacity:0.8;display:inline-flex;align-items:center;gap:3px;">
+            <span>▶</span> SOP
+          </button>
           <span class="ticket-severity severity-${sc.severity}" id="ticket-status-badge">${sc.severity}</span>
         </div>
       </div>

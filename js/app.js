@@ -1,3 +1,4 @@
+import { DiagnosticReplay } from './diagnosticReplay.js';
 /**
  * ============================================================================
  * CyberForge - Master Application Orchestrator (app.js)
@@ -348,6 +349,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Initialize Autonomous Diagnostic Replay Engine
+  const diagnosticReplay = new DiagnosticReplay({
+    scenarioEngine,
+    cliParser,
+    packetEngine,
+    soundFx
+  });
+
   // 10. Interactive Hero Mini-Terminal
   const heroInput = document.getElementById('hero-cli-input');
   const heroBody = document.getElementById('hero-cli-body');
@@ -373,11 +382,15 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (val === 'netlab') {
           resp.textContent = 'Jumping to interactive NetLab simulation workbench...';
           document.getElementById('netlab')?.scrollIntoView({ behavior: 'smooth' });
+        } else if (val === 'diagnostics' || val === 'replay' || val === 'audit' || val === 'demo') {
+          resp.textContent = 'Engaging autonomous SOP diagnostic replay for INC-101...';
+          resp.style.color = 'var(--cyber-cyan)';
+          diagnosticReplay.start();
         } else if (val === 'clear' || val === 'cls') {
           heroBody.innerHTML = '';
           return;
         } else {
-          resp.textContent = `Command '${val}' not found. Type: whoami, certs, netlab, clear`;
+          resp.textContent = `Command '${val}' not found. Type: whoami, certs, netlab, audit, clear`;
           resp.style.color = 'var(--text-muted)';
         }
 
@@ -408,6 +421,18 @@ document.addEventListener('DOMContentLoaded', () => {
     new DispatchForm(dispatchFormEl);
   }
 
+
+
+
+
+  // Delegated listener for SOP Replay button across ticket re-renders
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('#btn-trigger-sop-replay');
+    if (btn) {
+      diagnosticReplay.start();
+    }
+  });
+
   // 14. Initialize P2P WebRTC Pairing Manager
   const p2pSync = new P2pSync(networkGraph);
   const btnP2p = document.getElementById('btn-p2p-sync');
@@ -417,6 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 15. Initialize Global Command Palette (Ctrl+K)
   new CommandPalette([
+    { title: '⚡ Run Automated Diagnostic Replay (INC-101 SOP Audit)', category: 'Diagnostics', icon: '⚡', handler: () => diagnosticReplay.start() },
     { title: 'Launch NetLab: The Silent Gateway (INC-101)', category: 'Scenarios', icon: '🎫', handler: () => { scenarioEngine.loadScenario('INC-101'); document.getElementById('netlab')?.scrollIntoView({ behavior: 'smooth' }); } },
     { title: 'Launch NetLab: Broken DNS Resolver (INC-204)', category: 'Scenarios', icon: '🎫', handler: () => { scenarioEngine.loadScenario('INC-204'); document.getElementById('netlab')?.scrollIntoView({ behavior: 'smooth' }); } },
     { title: 'Launch NetLab: The Severed Trunk (INC-308)', category: 'Scenarios', icon: '🎫', handler: () => { scenarioEngine.loadScenario('INC-308'); document.getElementById('netlab')?.scrollIntoView({ behavior: 'smooth' }); } },
@@ -449,6 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
     canvas: topologyCanvas,
     scenarioEngine,
     rcaGenerator: RcaGenerator,
+    diagnosticReplay,
     p2pSync,
     soundFx
   };

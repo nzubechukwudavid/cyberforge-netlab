@@ -4,7 +4,7 @@
  * ============================================================================
  */
 
-const CACHE_NAME = 'cyberforge-v2.6';
+const CACHE_NAME = 'cyberforge-v3.1';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -18,6 +18,7 @@ const ASSETS_TO_CACHE = [
   './js/p2pSync.js',
   './js/commandPalette.js',
   './js/app.js',
+  './js/diagnosticReplay.js',
   './js/netlab/NetworkGraph.js',
   './js/netlab/PacketEngine.js',
   './js/netlab/PacketInspector.js',

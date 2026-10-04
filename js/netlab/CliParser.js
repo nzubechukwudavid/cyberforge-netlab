@@ -296,6 +296,23 @@ export class CliParser {
         this.renderShowRunningConfig(node);
         return;
       }
+      
+      if (sub === 'ip' && args[1]?.toLowerCase() === 'ospf') {
+        if (args[2]?.toLowerCase() === 'neighbor') {
+          this.printLine('Neighbor ID     Pri   State           Dead Time   Address         Interface\n192.168.100.2     1   FULL/BDR        00:00:33    192.168.1.1     Gi0/0\n10.0.5.2          1   FULL/DROTHER    00:00:36    10.0.5.10       Gi0/1', 'system-msg');
+          return;
+        }
+        this.printLine('OSPF Routing Process 1 with ID 192.168.1.1\nSupports only single TOS(TOS0) routes\nArea BACKBONE(0) (Inactive)\n   Number of interfaces in this area is 2', 'system-msg');
+        return;
+      }
+      if (sub === 'ip' && args[1]?.toLowerCase() === 'dhcp') {
+        if (args[2]?.toLowerCase() === 'binding') {
+          this.printLine('IP address       Client-ID/Hardware address      Lease expiration        Type\n192.168.1.105    0100.5056.a1b2.c3               Oct 05 2026 10:00 AM   Automatic', 'system-msg');
+          return;
+        }
+        this.printLine('Pool CYBERFORGE-LAN :\n Utilization mark (high/low)    : 100 / 0\n Subnet size (total/usable)       : 254 / 253\n Leased addresses                : 1\n Pending event                   : none', 'system-msg');
+        return;
+      }
       if (sub === 'vlan' || sub === 'vlan-brief') {
         this.printLine('VLAN Name                             Status    Ports\n---- -------------------------------- --------- -------------------\n1    default                          active    Fa0/1, Fa0/2, Fa0/3\n20   Marketing                        active    Fa0/4');
         return;
@@ -318,6 +335,26 @@ export class CliParser {
    */
   async executeHostCommand(node, cmd, args) {
     if (cmd === 'ipconfig' || cmd === 'ifconfig') {
+      if (args[0] === '/release') {
+        if (node.interfaces[0]) {
+          node.interfaces[0].ip = '0.0.0.0';
+          node.gateway = '';
+          this.printLine(`Ethernet adapter ${node.interfaces[0].name}:\n   Connection-specific DNS Suffix  . : cyberforge.local\n   IPv4 Address. . . . . . . . . . . : 0.0.0.0\n   Subnet Mask . . . . . . . . . . . : 0.0.0.0\n   Default Gateway . . . . . . . . . : `, 'system-msg');
+          this.graph.notify('NODE_CONFIG_CHANGED', node);
+        }
+        return;
+      }
+      if (args[0] === '/renew') {
+        this.printLine('Initiating DHCP DORA handshake across segment...', 'system-msg');
+        const res = await this.packetEngine.performDhcpDora(node);
+        if (res.success) {
+          this.printLine(`Ethernet adapter ${node.interfaces[0].name}:\n   Connection-specific DNS Suffix  . : cyberforge.local\n   IPv4 Address. . . . . . . . . . . : ${res.allocatedIp}\n   Subnet Mask . . . . . . . . . . . : ${res.subnetMask}\n   Default Gateway . . . . . . . . . : ${res.gateway}\n   DNS Servers . . . . . . . . . . . : ${res.dns}`, 'success-msg');
+        } else {
+          this.printLine(`% DHCP lease request failed: ${res.reason}`, 'error-msg');
+        }
+        return;
+      }
+
       if (args[0] === '/setgateway' || args[0] === '/gateway' || args[0] === '-g') {
         node.gateway = args[1] || '';
         node.initDefaultRoutes();

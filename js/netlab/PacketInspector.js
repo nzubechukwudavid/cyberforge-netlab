@@ -132,6 +132,11 @@ export class PacketInspector {
     if (p.type === 'ARP_REPLY') return `${p.srcIp} is at ${p.srcMac}`;
     if (p.type === 'DNS_REQ') return `Standard query 0x1a2b A ${p.payload.domain || 'host.domain'}`;
     if (p.type === 'DNS_RES') return `Standard query response 0x1a2b A ${p.payload.resolvedIp || '8.8.8.8'}`;
+    if (p.type === 'DHCP_DISCOVER') return `DHCP Discover - Transaction ID ${p.payload.transactionId || '0x39a1f2b4'}`;
+    if (p.type === 'DHCP_OFFER') return `DHCP Offer    - Assigned IP ${p.payload.offeredIp || '192.168.1.105'}`;
+    if (p.type === 'DHCP_REQUEST') return `DHCP Request  - Requesting ${p.payload.requestedIp || '192.168.1.105'}`;
+    if (p.type === 'DHCP_ACK') return `DHCP ACK      - Leased IP ${p.payload.allocatedIp || '192.168.1.105'}`;
+    if (p.type === 'OSPF_HELLO') return `OSPF Hello Packet - Area ${p.payload.area || 0}, RID ${p.payload.routerId || '192.168.1.1'}`;
     if (p.status === 'DROPPED') return `[PACKET DROPPED] ${p.dropReason || 'ACL / Physical severance'}`;
     return `${p.type} Data Frame`;
   }
@@ -157,9 +162,19 @@ export class PacketInspector {
         <div class="tree-children">
           <div class="tree-leaf">Destination: ${p.dstMac || '00:0C:29:4F:8E:12'}</div>
           <div class="tree-leaf">Source: ${p.srcMac || '00:50:56:A1:B2:C3'}</div>
-          <div class="tree-leaf">Type: IPv4 (0x0800)</div>
+          <div class="tree-leaf">Type: ${p.vlanId ? '802.1Q (0x8100)' : 'IPv4 (0x0800)'}</div>
         </div>
       </div>
+      ${p.vlanId ? `
+      <div class="tree-node">
+        <div class="tree-header">▼ <strong>802.1Q Virtual LAN, PRI: 0, DEI: 0, ID: ${p.vlanId}</strong></div>
+        <div class="tree-children">
+          <div class="tree-leaf">Priority: Best Effort (0)</div>
+          <div class="tree-leaf">DEI: Ineligible (0)</div>
+          <div class="tree-leaf">VLAN Identifier: ${p.vlanId}</div>
+          <div class="tree-leaf">Encapsulated EtherType: IPv4 (0x0800)</div>
+        </div>
+      </div>` : ''}
 
       <div class="tree-node">
         <div class="tree-header">▼ <strong>Internet Protocol Version 4, Src: ${p.srcIp}, Dst: ${p.dstIp}</strong></div>
@@ -176,6 +191,36 @@ export class PacketInspector {
         </div>
       </div>
 
+      ${p.protocol === 'DHCP' ? `
+      <div class="tree-node">
+        <div class="tree-header">▼ <strong>Bootstrap Protocol (DHCP) - ${p.payload.dhcpType || 'Message'}</strong></div>
+        <div class="tree-children">
+          <div class="tree-leaf">Message type: ${p.type.includes('DISCOVER') || p.type.includes('REQUEST') ? 'Boot Request (1)' : 'Boot Reply (2)'}</div>
+          <div class="tree-leaf">Hardware type: Ethernet (0x01)</div>
+          <div class="tree-leaf">Transaction ID: ${p.payload.transactionId || '0x39a1f2b4'}</div>
+          <div class="tree-leaf">Client IP address: ${p.payload.clientIp || '0.0.0.0'}</div>
+          <div class="tree-leaf">Your (client) IP address: ${p.payload.allocatedIp || p.payload.offeredIp || '0.0.0.0'}</div>
+          <div class="tree-leaf">Next server IP address: ${p.payload.serverIp || '192.168.1.1'}</div>
+          <div class="tree-leaf">Option: (53) DHCP Message Type (${p.payload.dhcpType || 'ACK'})</div>
+          <div class="tree-leaf">Option: (1) Subnet Mask (${p.payload.subnetMask || '255.255.255.0'})</div>
+          <div class="tree-leaf">Option: (3) Router (${p.payload.router || '192.168.1.1'})</div>
+          <div class="tree-leaf">Option: (6) Domain Name Server (${p.payload.dns || '8.8.8.8'})</div>
+        </div>
+      </div>
+  ` : (p.protocol === 'OSPF' ? `
+      <div class="tree-node">
+        <div class="tree-header">▼ <strong>Open Shortest Path First (OSPF) - Hello Packet</strong></div>
+        <div class="tree-children">
+          <div class="tree-leaf">Version: 2</div>
+          <div class="tree-leaf">Message Type: Hello Packet (1)</div>
+          <div class="tree-leaf">Source OSPF Router: ${p.payload.routerId || '192.168.1.1'}</div>
+          <div class="tree-leaf">Area ID: ${p.payload.area || 0} (Backbone)</div>
+          <div class="tree-leaf">Checksum: 0x2f14 [verified]</div>
+          <div class="tree-leaf">Hello Interval: 10 seconds | Dead Interval: 40 seconds</div>
+          <div class="tree-leaf">Designated Router (DR): ${p.payload.dr || '192.168.1.1'}</div>
+        </div>
+      </div>
+  ` : '')}
       <div class="tree-node">
         <div class="tree-header">▼ <strong>${p.protocol} Layer Details</strong></div>
         <div class="tree-children">

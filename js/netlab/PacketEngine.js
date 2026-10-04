@@ -283,4 +283,140 @@ export class PacketEngine {
     }
     this.emit('PACKET_CAPTURED', packet);
   }
+
+  /**
+   * DHCP DORA 4-Stage Transaction Simulation (RFC 2131)
+   */
+  async performDhcpDora(clientNode) {
+    const iface = clientNode.interfaces[0];
+    if (!iface) return { success: false, reason: 'No network interface available' };
+
+    const txId = '0x' + Math.floor(Math.random() * 0xffffffff).toString(16).padStart(8, '0');
+    const offeredIp = '192.168.1.105';
+    const gatewayIp = '192.168.1.1';
+    const dnsIp = '8.8.8.8';
+    const mask = '255.255.255.0';
+
+    // 1. DHCP Discover (Broadcast)
+    const p1 = new Packet({
+      type: 'DHCP_DISCOVER',
+      srcNodeId: clientNode.id,
+      srcIp: '0.0.0.0',
+      dstIp: '255.255.255.255',
+      protocol: 'DHCP',
+      payload: {
+        messageType: 1,
+        dhcpType: 'DHCP DISCOVER',
+        transactionId: txId,
+        clientMac: iface.mac,
+        clientIp: '0.0.0.0',
+        requestedIp: offeredIp
+      }
+    });
+    this.recordPacket(p1);
+    await new Promise(r => setTimeout(r, 60));
+
+    // 2. DHCP Offer (Unicast/Broadcast from Router/Server)
+    const routerNode = Array.from(this.graph.nodes.values()).find(n => n.type === 'router') || clientNode;
+    const p2 = new Packet({
+      type: 'DHCP_OFFER',
+      srcNodeId: routerNode.id,
+      srcIp: gatewayIp,
+      dstIp: '255.255.255.255',
+      protocol: 'DHCP',
+      payload: {
+        messageType: 2,
+        dhcpType: 'DHCP OFFER',
+        transactionId: txId,
+        clientMac: iface.mac,
+        offeredIp: offeredIp,
+        subnetMask: mask,
+        router: gatewayIp,
+        dns: dnsIp,
+        leaseTime: '86400s (24 hours)'
+      }
+    });
+    this.recordPacket(p2);
+    await new Promise(r => setTimeout(r, 60));
+
+    // 3. DHCP Request
+    const p3 = new Packet({
+      type: 'DHCP_REQUEST',
+      srcNodeId: clientNode.id,
+      srcIp: '0.0.0.0',
+      dstIp: '255.255.255.255',
+      protocol: 'DHCP',
+      payload: {
+        messageType: 1,
+        dhcpType: 'DHCP REQUEST',
+        transactionId: txId,
+        clientMac: iface.mac,
+        requestedIp: offeredIp,
+        serverIdentifier: gatewayIp
+      }
+    });
+    this.recordPacket(p3);
+    await new Promise(r => setTimeout(r, 60));
+
+    // 4. DHCP ACK
+    const p4 = new Packet({
+      type: 'DHCP_ACK',
+      srcNodeId: routerNode.id,
+      srcIp: gatewayIp,
+      dstIp: '255.255.255.255',
+      protocol: 'DHCP',
+      payload: {
+        messageType: 2,
+        dhcpType: 'DHCP ACK',
+        transactionId: txId,
+        clientMac: iface.mac,
+        assignedIp: offeredIp,
+        subnetMask: mask,
+        router: gatewayIp,
+        dns: dnsIp,
+        leaseTime: '86400s (24 hours)'
+      }
+    });
+    this.recordPacket(p4);
+
+    // Apply configuration to client node
+    iface.ip = offeredIp;
+    iface.subnetMask = mask;
+    clientNode.gateway = gatewayIp;
+    clientNode.dns = dnsIp;
+    this.graph.notify('NODE_CONFIG_CHANGED', clientNode);
+
+    return {
+      success: true,
+      allocatedIp: offeredIp,
+      subnetMask: mask,
+      gateway: gatewayIp,
+      dns: dnsIp
+    };
+  }
+
+  /**
+   * OSPF Hello Multicast Simulation (RFC 2328)
+   */
+  async sendOspfHello(routerNode) {
+    const p = new Packet({
+      type: 'OSPF_HELLO',
+      srcNodeId: routerNode.id,
+      srcIp: routerNode.interfaces[0]?.ip || '192.168.1.1',
+      dstIp: '224.0.0.5',
+      protocol: 'OSPF',
+      ttl: 1,
+      payload: {
+        area: 0,
+        routerId: routerNode.interfaces[0]?.ip || '192.168.1.1',
+        dr: routerNode.interfaces[0]?.ip,
+        bdr: '0.0.0.0',
+        helloInterval: 10,
+        deadInterval: 40
+      }
+    });
+    this.recordPacket(p);
+    return p;
+  }
+
 }

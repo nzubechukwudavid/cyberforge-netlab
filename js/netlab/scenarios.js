@@ -371,5 +371,97 @@ export const SCENARIOS = [
       ]
     }
   }
-];
+,
 
+  {
+    id: 'INC-901',
+    title: 'OSPF Adjacency & MTU Mismatch',
+    severity: 'elevated',
+    difficulty: 'Advanced',
+    domain: 'CCNA 200-301 // IP Routing',
+    description: 'Core Routers R1 and R2 fail to exchange OSPF database summaries and remain stuck in EXSTART/EXCHANGE state across their point-to-point link.',
+    symptoms: [
+      'OSPF neighbor state stuck in EXSTART on Gi0/1',
+      'Remote route 172.16.0.0/24 missing from routing table',
+      'show ip ospf neighbor indicates DBD negotiation failure'
+    ],
+    rootCause: 'Interface MTU mismatch on Gi0/1. Router-Core-1 has MTU 1500 while Router-Core-2 has MTU 1400, rejecting Database Description packets.',
+    hints: [
+      'Check OSPF neighbor status on Router-Core-1 using "show ip ospf neighbor".',
+      'Verify interface MTU settings on GigabitEthernet0/1.',
+      'Align MTU on interface: int Gi0/1, then configure matching MTU or set ip mtu 1500.'
+    ],
+    verify: (graph) => {
+      const r1 = graph.getNodeByName('Router-Core-1');
+      const r2 = graph.getNodeByName('Router-Core-2');
+      const if1 = r1?.getInterface('Gi0/1');
+      const if2 = r2?.getInterface('Gi0/1');
+      return if1 && if2 && (if1.mtu === if2.mtu || if1.mtu === 1500 && if2.mtu === 1500 || if2.mtu === 1500);
+    },
+    topology: {
+      nodes: [
+        { id: 'n-pc1', name: 'PC-Branch', type: 'host', x: 80, y: 180, gateway: '192.168.10.1',
+          interfaces: [{ name: 'eth0', ip: '192.168.10.50', subnetMask: '255.255.255.0' }] },
+        { id: 'n-r1', name: 'Router-Core-1', type: 'router', x: 260, y: 180,
+          interfaces: [
+            { name: 'Gi0/0', ip: '192.168.10.1', subnetMask: '255.255.255.0' },
+            { name: 'Gi0/1', ip: '10.255.0.1', subnetMask: '255.255.255.252', mtu: 1500 }
+          ] },
+        { id: 'n-r2', name: 'Router-Core-2', type: 'router', x: 440, y: 180,
+          interfaces: [
+            { name: 'Gi0/1', ip: '10.255.0.2', subnetMask: '255.255.255.252', mtu: 1400 },
+            { name: 'Gi0/0', ip: '172.16.1.1', subnetMask: '255.255.255.0' }
+          ] },
+        { id: 'n-srv1', name: 'HQ-Database', type: 'server', x: 620, y: 180, gateway: '172.16.1.1',
+          interfaces: [{ name: 'eth0', ip: '172.16.1.100', subnetMask: '255.255.255.0' }] }
+      ],
+      links: [
+        { sourceNodeId: 'n-pc1', sourceInterface: 'eth0', targetNodeId: 'n-r1', targetInterface: 'Gi0/0', mediaType: 'COPPER_STRAIGHT' },
+        { sourceNodeId: 'n-r1', sourceInterface: 'Gi0/1', targetNodeId: 'n-r2', targetInterface: 'Gi0/1', mediaType: 'FIBER' },
+        { sourceNodeId: 'n-r2', sourceInterface: 'Gi0/0', targetNodeId: 'n-srv1', targetInterface: 'eth0', mediaType: 'COPPER_STRAIGHT' }
+      ]
+    }
+  },
+
+  {
+    id: 'INC-902',
+    title: '802.1Q Native VLAN Trunk Mismatch',
+    severity: 'critical',
+    difficulty: 'Intermediate',
+    domain: 'CCNA 200-301 // Network Access',
+    description: 'Workstations on Marketing VLAN 10 experience intermittent frame drops and Spanning Tree Port Inconsistency across the 802.1Q trunk link.',
+    symptoms: [
+      '%SPANTREE-2-UNBLOCK_CONSIST_PORT: Port Gi0/1 unblocked on native vlan mismatch',
+      'VLAN 10 frames leaking into default VLAN across trunk',
+      'Marketing PC fails to reach HQ Application Server'
+    ],
+    rootCause: 'Trunk interface Gi0/1 on Switch-Distribution has native VLAN 99, while Switch-Core trunk Gi0/1 has native VLAN 1.',
+    hints: [
+      'Inspect trunk configuration on Switch-Distribution using "show vlan brief".',
+      'Check 802.1Q native VLAN settings on the inter-switch link.',
+      'Align native VLAN on Switch-Distribution: switchport trunk native vlan 1 (or 99 on both).'
+    ],
+    verify: (graph) => {
+      const sw1 = graph.getNodeByName('Switch-Distribution');
+      const sw2 = graph.getNodeByName('Switch-Core');
+      return sw1 && sw2 && (sw1.nativeVlan === sw2.nativeVlan || sw1.nativeVlan === 1 || sw2.nativeVlan === 99);
+    },
+    topology: {
+      nodes: [
+        { id: 'n-pc1', name: 'PC-Marketing', type: 'host', x: 80, y: 180, gateway: '192.168.10.1',
+          interfaces: [{ name: 'eth0', ip: '192.168.10.25', subnetMask: '255.255.255.0', vlan: 10 }] },
+        { id: 'n-sw1', name: 'Switch-Distribution', type: 'switch', x: 260, y: 180, nativeVlan: 99,
+          interfaces: [{ name: 'Fa0/1', vlan: 10 }, { name: 'Gi0/1', vlan: 99 }] },
+        { id: 'n-sw2', name: 'Switch-Core', type: 'switch', x: 440, y: 180, nativeVlan: 1,
+          interfaces: [{ name: 'Gi0/1', vlan: 1 }, { name: 'Fa0/2', vlan: 10 }] },
+        { id: 'n-srv1', name: 'HQ-AppServer', type: 'server', x: 620, y: 180, gateway: '192.168.10.1',
+          interfaces: [{ name: 'eth0', ip: '192.168.10.10', subnetMask: '255.255.255.0', vlan: 10 }] }
+      ],
+      links: [
+        { sourceNodeId: 'n-pc1', sourceInterface: 'eth0', targetNodeId: 'n-sw1', targetInterface: 'Fa0/1', mediaType: 'COPPER_STRAIGHT' },
+        { sourceNodeId: 'n-sw1', sourceInterface: 'Gi0/1', targetNodeId: 'n-sw2', targetInterface: 'Gi0/1', mediaType: 'COPPER_CROSS' },
+        { sourceNodeId: 'n-sw2', sourceInterface: 'Fa0/2', targetNodeId: 'n-srv1', targetInterface: 'eth0', mediaType: 'COPPER_STRAIGHT' }
+      ]
+    }
+  }
+];

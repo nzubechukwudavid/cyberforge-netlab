@@ -242,8 +242,10 @@ export class TopologyCanvas {
     }
 
     if (!this.draggedNode) return;
-    this.draggedNode.x = Math.max(40, Math.min(rect.width - 40, mouseX - this.dragOffset.x));
-    this.draggedNode.y = Math.max(40, Math.min(rect.height - 40, mouseY - this.dragOffset.y));
+    const rawX = mouseX - this.dragOffset.x;
+    this.draggedNode.x = Math.max(40, Math.min(rect.width - 40, Math.round(rawX / 10) * 10));
+    const rawY = mouseY - this.dragOffset.y;
+    this.draggedNode.y = Math.max(40, Math.min(rect.height - 40, Math.round(rawY / 10) * 10));
     this.render();
   }
 
@@ -295,18 +297,56 @@ export class TopologyCanvas {
 
       const isOperational = link.status === 'OPERATIONAL';
       const statusClass = link.status.toLowerCase();
+      const mediaClass = (link.mediaType || 'COPPER_STRAIGHT').toLowerCase().replace('_', '-');
       
       const midX = (srcNode.x + dstNode.x) / 2;
       const midY = (srcNode.y + dstNode.y) / 2;
 
+      // Calculate Vector for Interface Port Badges
+      const dx = dstNode.x - srcNode.x;
+      const dy = dstNode.y - srcNode.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      let portBadgesHtml = '';
+
+      if (dist > 75) {
+        const ux = dx / dist;
+        const uy = dy / dist;
+        const offset = 44; // distance from node center
+
+        const p1x = Math.round(srcNode.x + ux * offset);
+        const p1y = Math.round(srcNode.y + uy * offset);
+        const p2x = Math.round(dstNode.x - ux * offset);
+        const p2y = Math.round(dstNode.y - uy * offset);
+
+        const srcPort = link.sourceInterface || (srcNode.type === 'switch' ? 'Fa0/1' : srcNode.type === 'router' ? 'Gi0/0' : 'eth0');
+        const dstPort = link.targetInterface || (dstNode.type === 'switch' ? 'Fa0/2' : dstNode.type === 'router' ? 'Gi0/1' : 'eth0');
+
+        portBadgesHtml = `
+          <!-- Source Interface Badge -->
+          <g class="port-badge" transform="translate(${p1x}, ${p1y})">
+            <rect x="-14" y="-7" width="28" height="14" rx="3" />
+            <text x="0" y="3.5" text-anchor="middle">${srcPort}</text>
+            <title>${srcNode.name} [${srcPort}] - 1000BASE-T Full-Duplex</title>
+          </g>
+          <!-- Target Interface Badge -->
+          <g class="port-badge" transform="translate(${p2x}, ${p2y})">
+            <rect x="-14" y="-7" width="28" height="14" rx="3" />
+            <text x="0" y="3.5" text-anchor="middle">${dstPort}</text>
+            <title>${dstNode.name} [${dstPort}] - 1000BASE-T Full-Duplex</title>
+          </g>
+        `;
+      }
+
       linksHtml += `
         <g class="link-group" data-link-id="${link.id}">
           <line x1="${srcNode.x}" y1="${srcNode.y}" x2="${dstNode.x}" y2="${dstNode.y}" 
-                class="link-line ${statusClass}" />
+                class="link-line ${statusClass} ${mediaClass}" />
           
           <!-- Clickable Wider Invisible Hitbox -->
           <line x1="${srcNode.x}" y1="${srcNode.y}" x2="${dstNode.x}" y2="${dstNode.y}" 
                 stroke="transparent" stroke-width="18" style="cursor:pointer;" />
+          
+          ${portBadgesHtml}
 
           ${link.hasSnifferTap ? `
             <g class="sniffer-tap-badge" transform="translate(${midX - 12}, ${midY - 12})">

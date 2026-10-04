@@ -94,14 +94,34 @@ export class SkillsRadar {
 
       // Label text
       const labelDist = radius + 22;
-      const lx = centerX + Math.cos(angle) * labelDist;
-      const ly = centerY + Math.sin(angle) * labelDist;
+      let lx = centerX + Math.cos(angle) * labelDist;
+      let ly = centerY + Math.sin(angle) * labelDist;
 
       this.ctx.fillStyle = '#94a3b8';
       this.ctx.font = '10px JetBrains Mono, monospace';
-      this.ctx.textAlign = Math.abs(Math.cos(angle)) < 0.2 ? 'center' : Math.cos(angle) > 0 ? 'left' : 'right';
-      this.ctx.textBaseline = 'middle';
+      
+      let align = Math.abs(Math.cos(angle)) < 0.2 ? 'center' : Math.cos(angle) > 0 ? 'left' : 'right';
       const lines = Array.isArray(this.skills[i].label) ? this.skills[i].label : [this.skills[i].label];
+      
+      // Auto-shift to prevent clipping
+      let maxWidth = 0;
+      lines.forEach(line => {
+         const w = this.ctx.measureText(line).width;
+         if (w > maxWidth) maxWidth = w;
+      });
+      
+      const padding = 6;
+      if (align === 'right' && (lx - maxWidth < padding)) {
+         lx = maxWidth + padding;
+      } else if (align === 'left' && (lx + maxWidth > size - padding)) {
+         lx = size - maxWidth - padding;
+      } else if (align === 'center') {
+         if (lx - maxWidth/2 < padding) lx = maxWidth/2 + padding;
+         if (lx + maxWidth/2 > size - padding) lx = size - maxWidth/2 - padding;
+      }
+
+      this.ctx.textAlign = align;
+      this.ctx.textBaseline = 'middle';
       const lh = 12;
       const sy = ly - ((lines.length - 1) * lh) / 2;
       lines.forEach((line, idx) => {

@@ -4,7 +4,7 @@
  * ============================================================================
  */
 
-const CACHE_NAME = 'cyberforge-v2.5';
+const CACHE_NAME = 'cyberforge-v2.6';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
